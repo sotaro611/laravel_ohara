@@ -2,22 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ContactForm;
+use App\Models\ContactForm as ModelsContactForm;
 
 class ContactFormController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-
     public function index()
     {
-
+        //DBから情報を取得
         $contacts = ContactForm::select('id', 'name', 'title', 'gender', 'created_at')->get();
-        //
-        return view('contacts.index', compact('contacts', 'a'));
+        //genderの値と表示名を結び付け
+        // if ($contacts->gender === 0) {
+        //     $gender = '男性';
+        // } else {
+        //     $gender = '女性';
+        // }
+
+        //処理:contactsフォルダ内のindex.blade.phpを返す。
+        //view
+        return view('contacts.index', compact('contacts'));
     }
 
     /**
@@ -34,7 +41,7 @@ class ContactFormController extends Controller
      */
     public function store(Request $request)
     {
-        //フォームから送られてきたデータ
+        //
         // dd($request->name);
         ContactForm::create([
             'name' => $request->name,
@@ -44,8 +51,9 @@ class ContactFormController extends Controller
             'gender' => $request->gender,
             'age' => $request->age,
             'contact' => $request->contact,
-        ]);
 
+        ]);
+        //index ページニリダイレクト
         return to_route('contacts.index');
     }
 
@@ -54,7 +62,17 @@ class ContactFormController extends Controller
      */
     public function show(string $id)
     {
-        //
+        //find →１件データを取得。データが存在しない場合エラー
+        // findOrFail ⇒１件データを取得。データが存在しない場合404
+        $contact = ContactForm::findOrFail($id);
+
+        //性別の表記処理
+        if ($contact->gender === 0) {
+            $gender = '男性';
+        } else {
+            $gender = '女性';
+        }
+        return view('contacts.show', compact('contact', 'gender'));
     }
 
     /**
@@ -62,7 +80,14 @@ class ContactFormController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        //DBから一軒だけデータを取得。
+        $contact = ContactForm::findOrFail($id);
+        if ($contact->gender === 0) {
+            $gender = '男性';
+        } else {
+            $gender = '女性';
+        }
+        return view('contacts.edit', compact('contact', 'gender'));
     }
 
     /**
@@ -71,6 +96,17 @@ class ContactFormController extends Controller
     public function update(Request $request, string $id)
     {
         //
+        $before_contact = ContactForm::findOrFail($id);
+        $before_contact->name = $request->name;
+        $before_contact->title = $request->title;
+        $before_contact->email = $request->email;
+        $before_contact->url = $request->url;
+        $before_contact->gender = $request->gender;
+        $before_contact->age = $request->age;
+        $before_contact->contact = $request->contact;
+        $before_contact->save();
+
+        return to_route('contacts.index');
     }
 
     /**
