@@ -23,6 +23,7 @@ Route::prefix('contacts') // 頭に contacts をつける
             Route::get('/{id}', 'show')->name('show'); //show
             Route::get('/{id}/edit', 'edit')->name('edit'); //edit
             Route::post('/{id}', 'update')->name('update'); //update
+            Route::post('/{id}/destroy', 'destroy')->name('destroy'); //update
         }
     );
 
